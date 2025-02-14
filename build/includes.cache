@@ -1,0 +1,42 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\atomi\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\atomi\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\eightanaloginputs"
+  },
+  {
+    "Sourcefile": "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\build\\sketch\\SciFiRadio_Sound_Synth.ino.cpp",
+    "Include": "MozziGuts.h",
+    "Includepath": "C:\\Users\\atomi\\Documents\\Arduino\\libraries\\Mozzi"
+  },
+  {
+    "Sourcefile": "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\build\\sketch\\SciFiRadio_Sound_Synth.ino.cpp",
+    "Include": "FixMath.h",
+    "Includepath": "C:\\Users\\atomi\\Documents\\Arduino\\libraries\\FixMath\\src"
+  },
+  {
+    "Sourcefile": "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\build\\sketch\\SciFiRadio_Sound_Synth.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\atomi\\Documents\\Arduino\\libraries\\Mozzi\\mozzi_fixmath.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\atomi\\Documents\\Arduino\\libraries\\Mozzi\\utility\\FrequencyTimer2.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\atomi\\Documents\\Arduino\\libraries\\Mozzi\\utility\\TimerOne.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]
