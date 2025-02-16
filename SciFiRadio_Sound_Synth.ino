@@ -58,6 +58,7 @@ Oscil<COS2048_NUM_CELLS, AUDIO_RATE> aModulator(COS2048_DATA);
 Oscil<COS2048_NUM_CELLS, CONTROL_RATE> kIntensityMod(COS2048_DATA);
 
 int dialPosition = 0;
+int dialHist = 0;
 int mod_ratio = 5; // brightness (harmonics)
 long fm_intensity; // carries control info from updateControl to updateAudio
 
@@ -134,7 +135,10 @@ void updateControl(){
  // calculate the fm_intensity
   fm_intensity = ((long)LDR1_calibrated * knob2Val * (kIntensityMod.next()+128))>>8; // shift back to range after 8 bit multiply
 
+  if(dialHist != (dialPosition/10)){
+    dialHist = dialPosition/10;
     Serial.println(dialPosition/10); //Send dial position to the SciFiRadio.py 
+  }
 
   // print the value to the Serial monitor for debugging
 
