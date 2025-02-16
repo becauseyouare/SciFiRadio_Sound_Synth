@@ -2,29 +2,9 @@
 /* 
   using Mozzi sonification library.
 
-  Demonstrates analog input, audio and control oscillators, phase modulation
-  and smoothing a control signal at audio rate to avoid clicks.
-  Also demonstrates AutoMap, which maps unpredictable inputs to a set range.
-  
-  
   The circuit:
      Audio output on digital pin 9 (on a Uno or similar), or 
      check the README or http://sensorium.github.com/Mozzi/
-
-     Potentiometer connected to analog pin 0.
-       Center pin of the potentiometer goes to the analog pin.
-       Side pins of the potentiometer go to +5V and ground
-  
-     Light dependent resistor (LDR) and 5.1k resistor on analog pin 1:
-       LDR from analog pin to +5V
-       5.1k resistor from analog pin to ground
-     
-     Light dependent resistor (LDR) and 5.1k resistor on analog pin 2:
-       LDR from analog pin to +5V
-       5.1k resistor from analog pin to ground
-  
-  Mozzi help/discussion/announcements:
-  https://groups.google.com/forum/#!forum/mozzi-users
 
   Tim Barrass 2013.
   This example code is in the public domain.
@@ -38,9 +18,9 @@
  
 // int freqVal;
 const int carrFreq_M[] = {22,330,30,800,200,20,200,100,440,20,30,80,20,100,400,300,20,80,90,400,20};  // 22 to 880
-const int ldr1_M[] = {700,300,100,50,400,100,80,700,30,60,10,80,200,300,100,40,10,60,90,200,70}; // 10 to 700
+const int ldr1_M[] = {70,300,100,50,400,100,80,700,30,60,10,80,200,300,100,40,10,60,90,200,70}; // 10 to 700
 const int modSp_M[] = {1,50,9000,600,10,90,500,1000,2000,500,800,30,90,100,200,700,30,80,100,300,10}; // float (1 to 10000)/1000
-const int frq_M[] = {1,4,8,2,6,4,1,1,6,6,7,7,3,2,1,2,3,4,7,5,8,9,10,10};
+const int frq_M[] = {10,4,8,10,6,4,1,1,6,6,7,7,3,2,1,2,10,4,7,5,8,9,10,10};
 const int knob2_M[] = {0,1,3,2,7,6,9,3,4,5,8,3,2,2,1,2,6,7,8,3,9};
  
 // desired carrier frequency max and min, for AutoMap
@@ -88,56 +68,62 @@ Smooth <long> aSmoothIntensity(smoothness);
 
 void setup(){
   Serial.begin(115200); // set up the Serial output so we can look at the light level
-  Serial.println("Hello Mozzi");
-  startMozzi(); // :))
+  Serial.println("SciFiRadio_Sound_Synth.ino 2/15/2025 TomMcGuire");
+  startMozzi(); // 
   pinMode(2,INPUT_PULLUP);
   pinMode(3,INPUT_PULLUP);
   pinMode(4,INPUT_PULLUP);
 }
 
-void mapToDial(){
-  
-}
 
 void updateControl(){
 
   int DebugMode = 0;
-  if(digitalRead(2)) DebugMode = 1;
+  if(!digitalRead(2)) DebugMode = 1; // spits out all the variables if D2 is grounded
+
+  int pot0 = mozziAnalogRead(A3); // motor+ set up a galvanometer type thing between A3 and A4 to move the dial pointer
+  int pot1 = mozziAnalogRead(A4); //motor -
+  int potDif = pot0 - pot1;
+  
+  //dialPosition = mozziAnalogRead(KNOB_PIN); // value is 0-1023  // temporary input
+  if((potDif > 6)||(potDif < -6)){
+    dialPosition = dialPosition + potDif/4;
+    if(dialPosition > 10230){
+      dialPosition = 1;
+    }else if(dialPosition < 1){
+      dialPosition = 10230;
+    }
+    //Serial.println(dialPosition,DEC);
+  }
+  int a = dialPosition/500;
+  int x = (dialPosition/10) %50;
+  int carrier_freq = map(x,0,50,carrFreq_M[a],carrFreq_M[a+1]);
+  int LDR1_value =  map(x,0,50,ldr1_M[a],ldr1_M[a+1]);
+  float mod_speed =  map(x,0,50,modSp_M[a],modSp_M[a+1])/1000;
+  int FRQ =  map(x,0,50,frq_M[a],frq_M[a+1]);
+  int knob2Val =  map(x,0,50,knob2_M[a],knob2_M[a+1]);
 
 //  freqVal = map(LDR3_PIN, 0, 1023, 1, 100);
   
   // read the knob
-  int knob_value = mozziAnalogRead(KNOB_PIN); // value is 0-1023
+   //int knob_value = mozziAnalogRead(KNOB_PIN); // value is 0-1023
   // map the knob to carrier frequency
-  int carrier_freq = kMapCarrierFreq(knob_value);
+  // int carrier_freq = kMapCarrierFreq(knob_value);  //  ------Mapped-----
 
   // read the light dependent resistor on the width Analog input pin
-  int LDR1_value= mozziAnalogRead(LDR1_PIN); // value is 0-1023
+  // int LDR1_value= mozziAnalogRead(LDR1_PIN); // value is 0-1023  -----Mapped-----
   int LDR1_calibrated = kMapIntensity(LDR1_value);
 
-  // read the light dependent resistor on the speed Analog input pin
-  int LDR2_value= mozziAnalogRead(LDR2_PIN); // value is 0-1023
+  // int LDR2_value= mozziAnalogRead(LDR2_PIN); // value is 0-1023
   // use a float here for low frequencies
-  float mod_speed = (float)kMapModSpeed(LDR2_value)/1000;
+  // float mod_speed = (float)kMapModSpeed(LDR2_value)/1000;   //  ----Mapped-----
   kIntensityMod.setFreq(mod_speed);
 
-  int freqVal = mozziAnalogRead(LDR3_PIN); // value is 0-1023
-  int FRQ = mapThis(freqVal);
+  // int freqVal = mozziAnalogRead(LDR3_PIN); // value is 0-1023
+  // int FRQ = mapThis(freqVal);
   
-  int knob2 = mozziAnalogRead(LDR4_PIN); // value is 0-1023
-  int knob2Val = mapThis(knob2);
-
-  if(!digitalRead(3)){
-    carrier_freq = 92;
-    LDR1_calibrated = 152;
-    mod_speed = 6.84;
-    kIntensityMod.setFreq(mod_speed);
-    FRQ = 1;
-    knob2Val = 2;
-  }
-  
-
-
+  // int knob2 = mozziAnalogRead(LDR4_PIN); // value is 0-1023
+  // int knob2Val = mapThis(knob2);
 
   //calculate the modulation frequency to stay in ratio
   int mod_freq = carrier_freq * mod_ratio * FRQ;
@@ -148,9 +134,17 @@ void updateControl(){
  // calculate the fm_intensity
   fm_intensity = ((long)LDR1_calibrated * knob2Val * (kIntensityMod.next()+128))>>8; // shift back to range after 8 bit multiply
 
+    Serial.println(dialPosition/10); //Send dial position to the SciFiRadio.py 
 
   // print the value to the Serial monitor for debugging
+
     if(DebugMode){
+    Serial.print("a = "); 
+    Serial.print(a);
+    Serial.print(" "); // prints a tab
+    Serial.print("x = "); 
+    Serial.print(x);
+    Serial.print("\t"); // prints a tab
     Serial.print("carrier_freq = "); 
     Serial.print(carrier_freq);
     Serial.print("\t"); // prints a tab
@@ -160,29 +154,19 @@ void updateControl(){
     Serial.print("mod_speed = ");
     Serial.print(mod_speed);
     Serial.print("\t"); // prints a tab
-    Serial.print("LDR2 = "); 
-    Serial.print(LDR2_value);
-    Serial.print("\t"); // prints a tab
     Serial.print("  FRQ = "); 
     Serial.print(FRQ);
     Serial.print("\t"); // prints a tab
     Serial.print("knob2val = "); 
     Serial.print(knob2Val);
-    // Serial.print("\t"); // prints a tab
-    // Serial.print("   mod_speed = ");
-    // Serial.print(mod_speed);
     Serial.println(); // finally, print a carraige return for the next line of debugging info
   }
-
-  
 }
-
 
 int updateAudio(){
   long modulation = aSmoothIntensity.next(fm_intensity) * aModulator.next();
   return aCarrier.phMod(modulation);
 }
-
 
 void loop(){
   audioHook();
