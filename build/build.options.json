@@ -2,7 +2,7 @@
   "additionalFiles": "..\\..\\..,..\\..\\..",
   "compiler.optimization_flags": "",
   "customBuildProperties": "build.warn_data_percentage=75",
-  "fqbn": "arduino:avr:nano:cpu=atmega328old",
+  "fqbn": "arduino:avr:nano:cpu=atmega328",
   "hardwareFolders": "C:\\Users\\atomi\\AppData\\Local\\Arduino15\\packages",
   "otherLibrariesFolders": "C:\\Users\\atomi\\Documents\\Arduino\\libraries",
   "sketchLocation": "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth"

@@ -1,10 +1,10 @@
 #line 1 "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\.vscode\\arduino.json"
 {
   "port": "COM3",
-  "configuration": "cpu=atmega328old",
+  "configuration": "cpu=atmega328",
   "output": "build",
   "board": "arduino:avr:nano",
-  "programmer": "",
+  "programmer": "Arduino as ISP",
   "useProgrammer": false,
   "configurationRequired": true,
   "monitorPortSettings": {

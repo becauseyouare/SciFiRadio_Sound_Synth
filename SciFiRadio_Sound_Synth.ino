@@ -15,13 +15,17 @@
 #include <tables/cos2048_int8.h> // table for Oscils to play
 #include <Smooth.h>
 #include <AutoMap.h> // maps unpredictable inputs to a range
+#include <EventDelay.h> 
+
+// schedule print output
+EventDelay PrintCadence;
  
 // int freqVal;
-const int carrFreq_M[] = {22,330,30,800,200,20,200,100,440,20,30,80,20,100,400,300,20,80,90,400,20};  // 22 to 880
-const int ldr1_M[] = {70,300,100,50,400,100,80,700,30,60,10,80,200,300,100,40,10,60,90,200,70}; // 10 to 700
-const int modSp_M[] = {1,50,9000,600,10,90,500,1000,2000,500,800,30,90,100,200,700,30,80,100,300,10}; // float (1 to 10000)/1000
-const int frq_M[] = {10,4,8,10,6,4,1,1,6,6,7,7,3,2,1,2,10,4,7,5,8,9,10,10};
-const int knob2_M[] = {0,1,3,2,7,6,9,3,4,5,8,3,2,2,1,2,6,7,8,3,9};
+const int carrFreq_M[] = {22,330,30,800,200,20,200,100,40,20,30,80,20,100,400,300,20,80,90,400,30,50};  // 22 to 880
+const int ldr1_M[] =     {70,300,100,50,400,100,80,700,30,60,10,80,200,300,100,40,10,60,90,200,70}; // 10 to 700
+const int modSp_M[] =    {1,50,9000,600,10,90,500,1000,200,500,800,30,90,100,200,700,30,80,100,300,10}; // float (1 to 10000)/1000
+const int frq_M[] =      {10,04,8,10,06,04,01,01,06,06,07,01,03,02,01,02,10,02,07,05,8,9,10,10};  // 0 to 10
+const int knob2_M[] =    {0,01,03,02,07,06,9,03,04,10,00,03,02,02,01,02,06,07,8,03,00,00};  // 0 to 10
  
 // desired carrier frequency max and min, for AutoMap
 const int MIN_CARRIER_FREQ = 22;
@@ -61,6 +65,7 @@ int dialPosition = 0;
 int dialHist = 0;
 int mod_ratio = 5; // brightness (harmonics)
 long fm_intensity; // carries control info from updateControl to updateAudio
+unsigned long printDelay = 0;
 
 // smoothing for intensity to remove clicks on transitions
 float smoothness = 0.95f;
@@ -74,6 +79,7 @@ void setup(){
   pinMode(2,INPUT_PULLUP);
   pinMode(3,INPUT_PULLUP);
   pinMode(4,INPUT_PULLUP);
+  PrintCadence.set(60); // set the print rate at 60ms
 }
 
 
@@ -135,9 +141,12 @@ void updateControl(){
  // calculate the fm_intensity
   fm_intensity = ((long)LDR1_calibrated * knob2Val * (kIntensityMod.next()+128))>>8; // shift back to range after 8 bit multiply
 
-  if(dialHist != (dialPosition/10)){
-    dialHist = dialPosition/10;
-    Serial.println(dialPosition/10); //Send dial position to the SciFiRadio.py 
+  if(PrintCadence.ready()){
+    if(dialHist != (dialPosition/10)){
+      dialHist = dialPosition/10;
+      Serial.println(dialPosition/10); //Send dial position to the SciFiRadio.py 
+    }
+    PrintCadence.start(); // reset the print rste timer
   }
 
   // print the value to the Serial monitor for debugging

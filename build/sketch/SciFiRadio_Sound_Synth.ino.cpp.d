@@ -45,4 +45,5 @@ C:\Users\atomi\Dropbox\MyProjects2022-2025\SciFiRadio_Sound_Synth\build\sketch\S
  C:\Users\atomi\Documents\Arduino\libraries\Mozzi/mozzi_pgmspace.h \
  C:\Users\atomi\Documents\Arduino\libraries\Mozzi/Smooth.h \
  C:\Users\atomi\Documents\Arduino\libraries\Mozzi/AutoMap.h \
- C:\Users\atomi\Documents\Arduino\libraries\Mozzi/AutoRange.h
+ C:\Users\atomi\Documents\Arduino\libraries\Mozzi/AutoRange.h \
+ C:\Users\atomi\Documents\Arduino\libraries\Mozzi/EventDelay.h

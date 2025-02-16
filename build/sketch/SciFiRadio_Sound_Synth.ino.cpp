@@ -16,13 +16,17 @@
 #include <tables/cos2048_int8.h> // table for Oscils to play
 #include <Smooth.h>
 #include <AutoMap.h> // maps unpredictable inputs to a range
+#include <EventDelay.h> 
+
+// schedule print output
+EventDelay PrintCadence;
  
 // int freqVal;
-const int carrFreq_M[] = {22,330,30,800,200,20,200,100,440,20,30,80,20,100,400,300,20,80,90,400,20};  // 22 to 880
-const int ldr1_M[] = {70,300,100,50,400,100,80,700,30,60,10,80,200,300,100,40,10,60,90,200,70}; // 10 to 700
-const int modSp_M[] = {1,50,9000,600,10,90,500,1000,2000,500,800,30,90,100,200,700,30,80,100,300,10}; // float (1 to 10000)/1000
-const int frq_M[] = {10,4,8,10,6,4,1,1,6,6,7,7,3,2,1,2,10,4,7,5,8,9,10,10};
-const int knob2_M[] = {0,1,3,2,7,6,9,3,4,5,8,3,2,2,1,2,6,7,8,3,9};
+const int carrFreq_M[] = {22,330,30,800,200,20,200,100,40,20,30,80,20,100,400,300,20,80,90,400,30,50};  // 22 to 880
+const int ldr1_M[] =     {70,300,100,50,400,100,80,700,30,60,10,80,200,300,100,40,10,60,90,200,70}; // 10 to 700
+const int modSp_M[] =    {1,50,9000,600,10,90,500,1000,200,500,800,30,90,100,200,700,30,80,100,300,10}; // float (1 to 10000)/1000
+const int frq_M[] =      {10,04,8,10,06,04,01,01,06,06,07,01,03,02,01,02,10,02,07,05,8,9,10,10};  // 0 to 10
+const int knob2_M[] =    {0,01,03,02,07,06,9,03,04,10,00,03,02,02,01,02,06,07,8,03,00,00};  // 0 to 10
  
 // desired carrier frequency max and min, for AutoMap
 const int MIN_CARRIER_FREQ = 22;
@@ -59,49 +63,43 @@ Oscil<COS2048_NUM_CELLS, AUDIO_RATE> aModulator(COS2048_DATA);
 Oscil<COS2048_NUM_CELLS, CONTROL_RATE> kIntensityMod(COS2048_DATA);
 
 int dialPosition = 0;
+int dialHist = 0;
 int mod_ratio = 5; // brightness (harmonics)
 long fm_intensity; // carries control info from updateControl to updateAudio
+unsigned long printDelay = 0;
 
 // smoothing for intensity to remove clicks on transitions
 float smoothness = 0.95f;
 Smooth <long> aSmoothIntensity(smoothness);
 
 
-#line 69 "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\SciFiRadio_Sound_Synth.ino"
+#line 75 "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\SciFiRadio_Sound_Synth.ino"
 void setup();
-#line 79 "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\SciFiRadio_Sound_Synth.ino"
+#line 86 "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\SciFiRadio_Sound_Synth.ino"
 void updateControl();
-#line 180 "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\SciFiRadio_Sound_Synth.ino"
+#line 179 "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\SciFiRadio_Sound_Synth.ino"
 int updateAudio();
-#line 186 "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\SciFiRadio_Sound_Synth.ino"
+#line 184 "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\SciFiRadio_Sound_Synth.ino"
 void loop();
-#line 69 "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\SciFiRadio_Sound_Synth.ino"
+#line 75 "C:\\Users\\atomi\\Dropbox\\MyProjects2022-2025\\SciFiRadio_Sound_Synth\\SciFiRadio_Sound_Synth.ino"
 void setup(){
   Serial.begin(115200); // set up the Serial output so we can look at the light level
-  Serial.println("Hello Mozzi 21425");
-  startMozzi(); // :))
+  Serial.println("SciFiRadio_Sound_Synth.ino 2/15/2025 TomMcGuire");
+  startMozzi(); // 
   pinMode(2,INPUT_PULLUP);
   pinMode(3,INPUT_PULLUP);
   pinMode(4,INPUT_PULLUP);
+  PrintCadence.set(60); // set the print rate at 60ms
 }
 
 
 void updateControl(){
 
   int DebugMode = 0;
-  if(digitalRead(2)) DebugMode = 1;
+  if(!digitalRead(2)) DebugMode = 1; // spits out all the variables if D2 is grounded
 
-  // if(!digitalRead(3)){
-  //   carrier_freq = 92;
-  //   LDR1_calibrated = 152;
-  //   mod_speed = 6.84;
-  //   kIntensityMod.setFreq(mod_speed);
-  //   FRQ = 1;
-  //   knob2Val = 2;
-  // }
-
-  int pot0 = mozziAnalogRead(A3);
-  int pot1 = mozziAnalogRead(A4);
+  int pot0 = mozziAnalogRead(A3); // motor+ set up a galvanometer type thing between A3 and A4 to move the dial pointer
+  int pot1 = mozziAnalogRead(A4); //motor -
   int potDif = pot0 - pot1;
   
   //dialPosition = mozziAnalogRead(KNOB_PIN); // value is 0-1023  // temporary input
@@ -114,9 +112,8 @@ void updateControl(){
     }
     //Serial.println(dialPosition,DEC);
   }
-
-   int a = dialPosition/500;
-   int x = (dialPosition/10) %50;
+  int a = dialPosition/500;
+  int x = (dialPosition/10) %50;
   int carrier_freq = map(x,0,50,carrFreq_M[a],carrFreq_M[a+1]);
   int LDR1_value =  map(x,0,50,ldr1_M[a],ldr1_M[a+1]);
   float mod_speed =  map(x,0,50,modSp_M[a],modSp_M[a+1])/1000;
@@ -154,12 +151,17 @@ void updateControl(){
  // calculate the fm_intensity
   fm_intensity = ((long)LDR1_calibrated * knob2Val * (kIntensityMod.next()+128))>>8; // shift back to range after 8 bit multiply
 
+  if(PrintCadence.ready()){
+    if(dialHist != (dialPosition/10)){
+      dialHist = dialPosition/10;
+      Serial.println(dialPosition/10); //Send dial position to the SciFiRadio.py 
+    }
+    PrintCadence.start(); // reset the print rste timer
+  }
 
   // print the value to the Serial monitor for debugging
+
     if(DebugMode){
-    Serial.print("D = "); 
-    Serial.print(dialPosition);
-    Serial.print(" "); // prints a tab
     Serial.print("a = "); 
     Serial.print(a);
     Serial.print(" "); // prints a tab
@@ -182,16 +184,12 @@ void updateControl(){
     Serial.print(knob2Val);
     Serial.println(); // finally, print a carraige return for the next line of debugging info
   }
-
-  
 }
-
 
 int updateAudio(){
   long modulation = aSmoothIntensity.next(fm_intensity) * aModulator.next();
   return aCarrier.phMod(modulation);
 }
-
 
 void loop(){
   audioHook();
